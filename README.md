@@ -53,27 +53,8 @@ W | Auto skin rotator
 Q | Quit to menu
 Mouse wheel | Zoom in/out
 
-# Contributing
-
-To get started, please sign the [Contributor License Agreement](https://cla-assistant.io/ErmiyaEskandary/Slither.io-bot).
 
 
-Please contribute using [Github Flow](https://guides.github.com/introduction/flow/). Create a branch, add commits, and [open a pull request](https://github.com/ErmiyaEskandary/Slither.io-bot/compare/). **Please review the guidelines for contributing to this project before making an issue or submitting a pull request.Your pull request needs to be approved by at least 3 people until it is merged and all checks need to pass.**
-
-## Join us on Gitter (team communication)
-[![Gitter](https://badges.gitter.im/ErmiyaEskandary/Slither.io-bot.svg)](https://gitter.im/ErmiyaEskandary/Slither.io-bot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
-## Check us out on waffle.io (project management)
-[![Issues being worked on](https://badge.waffle.io/ErmiyaEskandary/Slither.io-bot.svg?label=Work%20in%20progress&title=Being%20Worked%20On)](http://waffle.io/ErmiyaEskandary/Slither.io-bot)
-
-
-[Check out the wiki for more information](https://github.com/ErmiyaEskandary/Slither.io-bot/wiki)
-
-# Authors
-**Ermiya Eskandary & Théophile Cailliau (ErmiyaEskandary & FliiFe)**
-
-Started as a collaborative and fun project between me and FliiFe on 2016/04/20, with this :
-> Slither.io bot could be cool
 
 # License
 
