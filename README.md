@@ -1,19 +1,5 @@
 # Slither.io bot
-Goal : make a bot for slither.io
-
-[![CLA assistant](https://cla-assistant.io/readme/badge/ErmiyaEskandary/Slither.io-bot)](https://cla-assistant.io/ErmiyaEskandary/Slither.io-bot)
-[![Documentation Status](https://readthedocs.org/projects/slitherio-bot/badge/?version=docs)](http://slitherio-bot.readthedocs.io/en/docs/?badge=docs)
-
-# Table of Contents
-- [Installation instructions](https://github.com/ErmiyaEskandary/Slither.io-bot#installation-instructions)
-	- [Visual tutorial](https://github.com/ErmiyaEskandary/Slither.io-bot#visual-tutorial)
-	- [Text tutorial](https://github.com/ErmiyaEskandary/Slither.io-bot#text-tutorial)
-- [Hotkeys](https://github.com/ErmiyaEskandary/Slither.io-bot#hotkeys)
-- [Contributing](https://github.com/ErmiyaEskandary/Slither.io-bot#contributing)
-	- [Join us on Gitter (team communication)](https://github.com/ErmiyaEskandary/Slither.io-bot#join-us-on-gitter-team-communication)
-	- [Check us out on waffle.io (project management)](https://github.com/ErmiyaEskandary/Slither.io-bot#check-us-out-on-waffleio-project-management)
-- [Authors](https://github.com/ErmiyaEskandary/Slither.io-bot#authors)
-- [License](https://github.com/ErmiyaEskandary/Slither.io-bot#license)
+Goal : make a predator bot for slither.io that is hunting and kill other snakes
 
 # Installation instructions
 ## Interactive tutorial
