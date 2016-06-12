@@ -742,8 +742,8 @@ var bot = window.bot = (function() {
 						
 						if (bot.collisionAngles[i].distance < frontHeadDist) bot.frontCollision = true;
 						
-						if (bot.collisionAngles[i].distance < minHeadDist || bot.frontCollision || (bot.collisionAngles[i].distance < minHeadDist * 2 && bot.collisionAngles[i].isHead > 7)) {
-						
+						if (bot.collisionAngles[i].distance < minHeadDist || (bot.collisionAngles[i].distance < frontHeadDist) || (bot.collisionAngles[i].distance < minHeadDist * 2 && bot.collisionAngles[i].isHead > 8)) {
+
 							bot.isCollision = true;
 							bot.isHeadCollision = (bot.collisionAngles[i].isHead > 0);
 							
