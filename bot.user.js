@@ -846,7 +846,7 @@ var bot = window.bot = (function() {
 
         // Checks to see if you are going to collide with anything in the collision detection radius
         checkCollision: function() {
-			bot.headCircleRadius = bot.opt.radiusMult * bot.snakeRadius / 2;
+			bot.headCircleRadius = bot.opt.radiusMult * bot.snakeRadius * 0.8;
             var headCircle = canvasUtil.circle(
                 window.snake.xx,
 				window.snake.yy,
