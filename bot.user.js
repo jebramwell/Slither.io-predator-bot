@@ -385,7 +385,7 @@ var bot = window.bot = (function() {
         sectorBox: {},
         currentFood: {},
 		foodAccelDist2: 200000,
-		foodAccelSize: 40,
+		foodAccelSize: 99,
         foodFrames: 8,
 		foodAccelAngle: Math.PI / 2,
         opt: {
@@ -892,6 +892,8 @@ var bot = window.bot = (function() {
 			{
                 var midlAng = canvasUtil.fastAtan2(
                     window.snake.yy - bot.MID_X, window.snake.xx - bot.MID_Y);
+					
+				if ((Math.abs(window.snake.yy - bot.MID_X) + Math.abs(window.snake.xx - bot.MID_Y))<2000) midlAng = midlAng + Math.PI / 2;
 
 				midCollisionAngle_x= bot.MID_X + bot.MAP_R * Math.cos(midlAng);
                 midCollisionAngle_y= bot.MID_Y + bot.MAP_R * Math.sin(midlAng);
@@ -982,97 +984,104 @@ var bot = window.bot = (function() {
         },
 
         computeFoodGoal: function() {
-            var foodClusters = [];
-            var foodGetIndex = [];
-            var fi = 0;
-            var sw = bot.snakeWidth;
+            
+			var foodAngles = [];
+			var foodWeights = [];
+			
+			var sx = window.snake.xx;
+			var sy = window.snake.yy;
+			var headCircleRadius2 = Math.pow(bot.headCircleRadius, 2);
 
             for (var i = 0; i < window.foods.length && window.foods[i] !== null; i++) {
                 var a;
                 var da;
                 var gotoda;
-                var distance;
+				var f = window.foods[i];
+				var cx = f.xx;
+				var cy = f.yy;
+				var distance = canvasUtil.getDistance2(cx, cy, sx, sy);
                 var sang = window.snake.ehang;
-                var f = window.foods[i];
+                
+					
+				
 
-                if (!f.eaten &&
-                    !(
-                        canvasUtil.circleIntersect(
-                            canvasUtil.circle(f.xx, f.yy, 2),
-                            bot.sidecircle_l, true) ||
-                        canvasUtil.circleIntersect(
-                            canvasUtil.circle(f.xx, f.yy, 2),
-                            bot.sidecircle_r, true))) {
+                if (!f.eaten) {
+							
+							
+							
 
-                    var cx = Math.round(Math.round(f.xx / sw) * sw);
-                    var cy = Math.round(Math.round(f.yy / sw) * sw);
-                    var csz = Math.round(f.sz);
+                    var csz = f.sz;
+					
+					a = canvasUtil.fastAtan2(cy - sy, cx - sx);
+					var aIndex = bot.getAngleIndex(a);
+                    da = Math.min((2 * Math.PI) - Math.abs(a - sang), Math.abs(a - sang));
+                    gotoda = Math.min((2 * Math.PI) - Math.abs(a - bot.gotoAngle), Math.abs(a - bot.gotoAngle));	
+					
+					if (bot.collisionAngles[aIndex] === undefined || distance < bot.collisionAngles[aIndex].distance)
+					{
+						if (foodAngles[aIndex] === undefined) {
+							foodWeights[aIndex] = csz;
+							foodAngles[aIndex] = 50 * csz / (Math.abs(Math.sqrt(distance )-bot.snakeRadius*4)+1) / (da+1) / (gotoda + 3);
+						}
+						else {
+							foodAngles[aIndex] += 50 * csz / (Math.abs(Math.sqrt(distance )-bot.snakeRadius*4)+1) / (da+1) / (gotoda + 3);
+							foodWeights[aIndex] += csz;
+						}
+					}
 
-                    if (foodGetIndex[cx + '|' + cy] === undefined) {
-                        foodGetIndex[cx + '|' + cy] = fi;
-                        a = canvasUtil.fastAtan2(cy - window.snake.yy, cx - window.snake.xx);
-                        da = Math.min(
-                            (2 * Math.PI) - Math.abs(a - sang), Math.abs(a - sang));
-                        gotoda = Math.min(
-                            (2 * Math.PI) - Math.abs(a - bot.gotoAngle), Math.abs(a - bot.gotoAngle)) * 10;
-
-						if (bot.mouseFollow) gotoda = gotoda * 10;
-                        distance = Math.round(
-                            canvasUtil.getDistance2(cx, cy, window.snake.xx, window.snake.yy));
-                        foodClusters[fi] = {
-                            x: cx,
-                            y: cy,
-                            a: a,
-                            da: da,
-							gotoda: gotoda,
-                            sz: csz,
-                            distance: distance,
-                            score: 0.0
-                        };
-                        fi++;
-                    } else {
-                        foodClusters[foodGetIndex[cx + '|' + cy]].sz += csz;
-                    }
                 }
             }
 
-            foodClusters.forEach(bot.scoreFood);
-            foodClusters.sort(bot.sortScore);
+	
+			var foodWeight = 0;
+			var foodAindex = 0;
 
-            for (i = 0; i < foodClusters.length; i++) {
-                var aIndex = bot.getAngleIndex(foodClusters[i].a);
-                if (bot.collisionAngles[aIndex] === undefined ||
-                    (Math.sqrt(bot.collisionAngles[aIndex].distance) -
-                        bot.snakeRadius * bot.opt.radiusMult / 2 >
-                        Math.sqrt(foodClusters[i].distance) &&
-                        foodClusters[i].sz > bot.opt.foodSmallSize)
-                ) {
-                    bot.currentFood = foodClusters[i];
-                    return;
-                }
-            }
+			for (var i = 0; i < foodAngles.length; i++) {
+
+
+				if (foodAngles[i] !== undefined) {
+						if (foodAngles[i]>foodWeight)
+						{
+							foodWeight=foodAngles[i];
+							foodAindex=i;
+						}
+					
+				}
+
+				
+			}
+			if (foodWeight==0)
+			{
+				bot.currentFood = {
+					x: bot.MID_X,
+					y: bot.MID_Y,
+					sz: 0,
+					ang: 0,
+					foodAindex: 0
+				};			
+				return;
+			}
+			var foodAngle = bot.arcSize * foodAindex;
+			
+			
             bot.currentFood = {
-                x: bot.MID_X,
-                y: bot.MID_Y
-            };
+                x: sx + bot.fullHeadCircleRadius * Math.cos(foodAngle),
+                y: sy + bot.fullHeadCircleRadius * Math.sin(foodAngle),
+				sz: foodWeights[foodAindex],
+				ang: foodAngle,
+				aIndex: foodAindex
+            };			
+			return;
+			
         },
 
         foodAccel: function() {
             var aIndex = 0;
-
-            if (bot.currentFood && bot.currentFood.sz > bot.foodAccelSize) {
-                aIndex = bot.getAngleIndex(bot.currentFood.a);
-
-                if (
-                    bot.collisionAngles[aIndex] && bot.collisionAngles[aIndex].distance >
-                    bot.currentFood.distance + Math.pow(bot.frontArcRadius, 2) &&
-                    bot.currentFood.da < bot.foodAccelAngle && bot.currentFood.distance > bot.foodAccelDist2) {
+			var sang = window.snake.ehang;
+			var da = Math.min((2 * Math.PI) - Math.abs(bot.currentFood.ang - sang), Math.abs(bot.currentFood.ang - sang));
+			
+            if (bot.currentFood && bot.currentFood.sz > bot.foodAccelSize && da < bot.foodAccelAngle && (bot.collisionAngles[bot.currentFood.aIndex] === undefined || bot.collisionAngles[bot.currentFood.aIndex].disance < Math.pow(bot.frontArcRadius, 2)) ) {
                     return 1;
-                }
-
-                if (bot.collisionAngles[aIndex] === undefined && bot.currentFood.da < bot.foodAccelAngle && bot.currentFood.distance > bot.foodAccelDist2) {
-                    return 1;
-                }
             }
 
             return bot.defaultAccel;
@@ -1658,12 +1667,12 @@ var userInterface = window.userInterface = (function() {
 
                 if (window.goalCoordinates) {
                     if (window.goalCoordinates.sz) {
-                        oContent.push('target sz: ' + window.goalCoordinates.sz);
+                        oContent.push('target sz: ' + Math.round(window.goalCoordinates.sz));
                     }
                     else
 						oContent.push('target');
-                    oContent.push('x: ' + window.goalCoordinates.x + ' y: ' +
-                        window.goalCoordinates.y);
+                    oContent.push('x: ' + Math.round(window.goalCoordinates.x) + ' y: ' +
+                        Math.round(window.goalCoordinates.y));
                 }
                     oContent.push('check: ' + bot.checktime+'ms');
 				
