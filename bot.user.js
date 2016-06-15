@@ -409,6 +409,7 @@ var bot = window.bot = (function() {
         MID_Y: 0,
         MAP_R: 0,
 		pingtime: '',
+		pingDelay: 0,
 
         getSnakeWidth: function(sc) {
             if (sc === undefined) sc = window.snake.sc;
@@ -1110,6 +1111,30 @@ var bot = window.bot = (function() {
 					window.setAcceleration(bot.defaultAccel);				
 				else
 					window.setAcceleration(bot.foodAccel());
+					
+				bot.pingDelay++;
+                if (window.bso !== undefined && bot.pingDelay > 30) {
+				
+					bot.pingDelay=0;
+
+					var startTime = (new Date()).getTime(),
+						endTime;
+
+					new userInterface.ping('ws://'+window.bso.ip + ':' + window.bso.po+'/slither', function (status, e) {
+											endTime = (new Date()).getTime();
+											bot.pingtime=(endTime - startTime);
+											if (bot.pingtime<10) bot.pingtime=' '+bot.pingtime;
+
+
+										});
+					
+				
+
+				}
+					
+
+					
+					
             }
 			
 			if (window.visualDebugging && !bot.manualFood) {
@@ -1140,27 +1165,6 @@ var bot = window.bot = (function() {
 			}
 
 			
-                if (window.bso !== undefined) {
-
-				var startTime = (new Date()).getTime(),
-					endTime;
-
-				new userInterface.ping('ws://'+window.bso.ip + ':' + window.bso.po+'/slither', function (status, e) {
-										endTime = (new Date()).getTime();
-										bot.pingtime=(endTime - startTime);
-										if (bot.pingtime<10) bot.pingtime=' '+bot.pingtime;
-
-
-									});
-				
-				
-
-				}
-				else {
-			
-					bot.pingtime='';
-				}	
-
 			
 		},
 
