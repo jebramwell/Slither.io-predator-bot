@@ -370,6 +370,11 @@ var bot = window.bot = (function() {
 		lastAvoidDiffAngle: 0,
 		mGoToAngle: Math.PI,
 		mouseFollow: false,
+		predatorMode: true,
+		lookForSnakeDelayCnt: 0,
+		lookForSnakeDelay: 100,
+		isHunting: false,
+		huntSnake: false,
         isBotRunning: false,
         isBotEnabled: true,
         lookForFood: false,
@@ -403,6 +408,7 @@ var bot = window.bot = (function() {
         MID_X: 0,
         MID_Y: 0,
         MAP_R: 0,
+		pingtime: '',
 
         getSnakeWidth: function(sc) {
             if (sc === undefined) sc = window.snake.sc;
@@ -485,8 +491,8 @@ var bot = window.bot = (function() {
 				}
 				
 				window.goalCoordinates = {
-										x: window.snake.xx+bot.fullHeadCircleRadius*Math.cos(bot.gotoAngle),
-										y: window.snake.yy+bot.fullHeadCircleRadius*Math.sin(bot.gotoAngle)
+										x: Math.round(window.snake.xx+bot.fullHeadCircleRadius*Math.cos(bot.gotoAngle)),
+										y: Math.round(window.snake.yy+bot.fullHeadCircleRadius*Math.sin(bot.gotoAngle))
 				};
 
 				canvasUtil.setMouseCoordinates(canvasUtil.mapToMouse(window.goalCoordinates));
@@ -642,7 +648,7 @@ var bot = window.bot = (function() {
 									xx: window.snakes[snake].xx + (100+snradius)/10*snp * sncos*2,
 									yy: window.snakes[snake].yy+ (100+snradius)/10*snp * snsin*2,
 									snake: snake,
-									radius: snradius * (5+snp)/5,
+									radius: (snradius+10) * (5+snp)/5,
 									isHead: window.snakes[snake].sp
 								};
 
@@ -684,7 +690,11 @@ var bot = window.bot = (function() {
 					
 					
                     for (var pts = 0, lp = window.snakes[snake].pts.length; pts < lp; pts++) {
-                        if (!window.snakes[snake].pts[pts].dying) {
+                        if (!window.snakes[snake].pts[pts].dying &&
+                            canvasUtil.pointInRect({
+                                x: window.snakes[snake].pts[pts].xx,
+                                y: window.snakes[snake].pts[pts].yy
+                            }, bot.sectorBox)) {
 						
 							if (window.snakes[snake].pts[pts].xx < snakes_minX) snakes_minX = window.snakes[snake].pts[pts].xx;
 							if (window.snakes[snake].pts[pts].xx > snakes_maxX) snakes_maxX = window.snakes[snake].pts[pts].xx;
@@ -1023,6 +1033,9 @@ var bot = window.bot = (function() {
         },
 
         every: function() {
+		
+
+			
             bot.MID_X = window.grd;
             bot.MID_Y = window.grd;
             bot.MAP_R = window.grd * 0.98;
@@ -1065,15 +1078,23 @@ var bot = window.bot = (function() {
         // Main bot
         go: function() {
             bot.every();
-
             if (bot.checkCollision()) {
                 bot.lookForFood = false;
                 if (bot.foodTimeout) {
                     window.clearTimeout(bot.foodTimeout);
                     bot.foodTimeout = window.setTimeout(
-                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
+                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames * 3);
                 }
             } else {
+			
+				if (bot.predatorMode)
+				{
+					if (bot.isHunting)
+						bot.lookForSnakeDelayCnt = 0;
+					else if (bot.snakeRadius > 15)
+						bot.lookForSnakeDelayCnt++;
+					
+				}
 
 				//if mousefollow on
 				if(bot.mouseFollow){
@@ -1082,10 +1103,15 @@ var bot = window.bot = (function() {
                 bot.lookForFood = !bot.manualFood;
                 if (bot.foodTimeout === undefined) {
                     bot.foodTimeout = window.setTimeout(
-                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames);
+                        bot.foodTimer, 1000 / bot.opt.targetFps * bot.opt.foodFrames * 2);
                 }
-				window.setAcceleration(bot.foodAccel());
+				
+				if (bot.manualFood)
+					window.setAcceleration(bot.defaultAccel);				
+				else
+					window.setAcceleration(bot.foodAccel());
             }
+			
 			if (window.visualDebugging && !bot.manualFood) {
 				canvasUtil.drawLine({
 						x: window.snake.xx,
@@ -1112,7 +1138,31 @@ var bot = window.bot = (function() {
 					},
 					'green');
 			}
-        },
+
+			
+                if (window.bso !== undefined) {
+
+				var startTime = (new Date()).getTime(),
+					endTime;
+
+				new userInterface.ping('ws://'+window.bso.ip + ':' + window.bso.po+'/slither', function (status, e) {
+										endTime = (new Date()).getTime();
+										bot.pingtime=(endTime - startTime);
+										if (bot.pingtime<10) bot.pingtime=' '+bot.pingtime;
+
+
+									});
+				
+				
+
+				}
+				else {
+			
+					bot.pingtime='';
+				}	
+
+			
+		},
 
         // Timer version of food check
         foodTimer: function() {
@@ -1134,13 +1184,12 @@ var userInterface = window.userInterface = (function() {
     var original_oef = window.oef;
     var original_redraw = window.redraw;
     var original_onmousemove = window.onmousemove;
-
     window.oef = function() {};
     window.redraw = function() {};
 
     return {
         overlays: {},
-
+		
         initOverlays: function() {
             var botOverlay = document.createElement('div');
             botOverlay.style.position = 'fixed';
@@ -1316,6 +1365,10 @@ var userInterface = window.userInterface = (function() {
                 if (e.keyCode === 78) {
                     bot.mouseFollow = !bot.mouseFollow;
                 }
+				 // Letter `P` to togle predator on/off
+                if (e.keyCode === 80) {
+                    bot.predatorMode = !bot.predatorMode;
+                }
                 // Letter `T` to toggle bot
                 if (e.keyCode === 84) {
                     bot.isBotEnabled = !bot.isBotEnabled;
@@ -1487,7 +1540,37 @@ var userInterface = window.userInterface = (function() {
 
             userInterface.overlays.statsOverlay.innerHTML = oContent.join('<br/>');
         },
+	 ping: function(ip, callback) {
 
+		if (!this.inUse) {
+			this.status = 'unchecked';
+			this.inUse = true;
+			this.callback = callback;
+			this.ip = ip;
+			var _that = this;
+			this.img = new Image();
+			this.img.onload = function () {
+				_that.inUse = false;
+				_that.callback('responded');
+
+			};
+			this.img.onerror = function (e) {
+				if (_that.inUse) {
+					_that.inUse = false;
+					_that.callback('respondederr', e);
+				}
+
+			};
+			this.start = new Date().getTime();
+			this.img.src =  ip;
+			this.timer = setTimeout(function () {
+				if (_that.inUse) {
+					_that.inUse = false;
+					_that.callback('timeout');
+				}
+			}, 1500);
+		}
+	},
         onPrefChange: function() {
             // Set static display options here.
             var oContent = [];
@@ -1497,6 +1580,7 @@ var userInterface = window.userInterface = (function() {
             oContent.push('[T / Right click] bot: ' + ht(bot.isBotEnabled));
             oContent.push('[O] mobile rendering: ' + ht(window.mobileRender));
             oContent.push('[A/S] radius multiplier: ' + bot.opt.radiusMult);
+//			oContent.push('[P] predator: ' + ht(bot.predatorMode));
 			oContent.push('[N] mouse follow: ' + ht(bot.mouseFollow));
 			oContent.push('[M] manually feed: ' + ht(bot.manualFood));
             oContent.push('[D] quick radius change ' +bot.opt.radiusApproachSize + '/' + bot.opt.radiusAvoidSize);
@@ -1506,7 +1590,6 @@ var userInterface = window.userInterface = (function() {
             oContent.push('[H] overlays');
             oContent.push('[B] change background');
             oContent.push('[Mouse Wheel] zoom');
-            oContent.push('[ESC] quick respawn');
             oContent.push('[Q] quit to menu');
             userInterface.overlays.prefOverlay.innerHTML = oContent.join('<br/>');
         },
@@ -1516,8 +1599,9 @@ var userInterface = window.userInterface = (function() {
             var oContent = [];
 
             if (window.playing && window.snake !== null) {
-                oContent.push('fps: ' + userInterface.framesPerSecond.fps);
+			
 
+				oContent.push('fps: ' + userInterface.framesPerSecond.fps+' ping: '+bot.pingtime+'ms');
                 // Display the X and Y of the snake
                 oContent.push('x: ' +
                     (Math.round(window.snake.xx) || 0) + ' y: ' +
@@ -1534,8 +1618,12 @@ var userInterface = window.userInterface = (function() {
 
                 if (window.bso !== undefined && userInterface.overlays.serverOverlay.innerHTML !==
                     window.bso.ip + ':' + window.bso.po) {
+
                     userInterface.overlays.serverOverlay.innerHTML =
                         window.bso.ip + ':' + window.bso.po;
+
+
+						
                 }
             }
 
