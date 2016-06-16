@@ -1016,16 +1016,20 @@ var bot = window.bot = (function() {
 	
 			var foodWeight = 0;
 			var foodAindex = 0;
-
+			var fw=0;
 			for (var i = 0; i < (2 * Math.PI) / bot.arcSize; i++) {
 
 
 				if (foodAngles[i] !== undefined) {
-						var fw=foodAngles[i] / (da + gotoda * 2 + 0.1);
-						if (fw>foodWeight)
+						a = bot.arcSize * i;
+						da = Math.min((2 * Math.PI) - Math.abs(a - sang), Math.abs(a - sang));
+						gotoda = Math.min((2 * Math.PI) - Math.abs(a - bot.gotoAngle), Math.abs(a - bot.gotoAngle));	
+				
+						fw = foodAngles[i] / (da *0.5 + gotoda + 2);
+						if (fw > foodWeight)
 						{
 							foodWeight=fw;
-							foodAindex=i;
+							foodAindex = i;
 						}
 					
 				}
