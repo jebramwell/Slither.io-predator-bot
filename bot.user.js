@@ -724,12 +724,12 @@ var bot = window.bot = (function() {
 									}
 					}					
 					
-					if (fencingAngleslength > (2 * Math.PI / bot.arcSize) * 0.6 )
+					if (fencingAngleslength > (2 * Math.PI / bot.arcSize) * 0.47 )
 					{
 						bot.fencingSnake=true;
 						for (i = 0; i < ((2 * Math.PI) / bot.arcSize); i++) {
 										if (fencingAngles[i] !== undefined) {										
-											bot.collisionAngles[i].distance=fullHeadCircleRadius2-1;
+											bot.collisionAngles[i].distance=Math.min(fullHeadCircleRadius2-1,bot.collisionAngles[i].distance);
 										}
 						}
 					}
@@ -885,7 +885,7 @@ var bot = window.bot = (function() {
 
 			bot.headCircleRadius = bot.opt.radiusMult * (8+bot.snakeRadius) / 3;
 			bot.frontArcAngle = Math.PI / bot.speedMult / 2.5;
-			bot.frontArcRadius = bot.headCircleRadius * bot.speedMult * 2.2;
+			bot.frontArcRadius = bot.headCircleRadius * bot.speedMult * 2;
 			bot.fullHeadCircleRadius = bot.opt.radiusMult * bot.snakeRadius * 2;
 
 			
@@ -998,7 +998,7 @@ var bot = window.bot = (function() {
                     da = Math.min((2 * Math.PI) - Math.abs(a - sang), Math.abs(a - sang));
                     gotoda = Math.min((2 * Math.PI) - Math.abs(a - bot.gotoAngle), Math.abs(a - bot.gotoAngle));	
 					
-					if (bot.collisionAngles[aIndex] === undefined || distance < bot.collisionAngles[aIndex].distance)
+					if (bot.collisionAngles[aIndex] === undefined || distance < bot.collisionAngles[aIndex].distance - headCircleRadius2 / 2)
 					{
 						if (foodAngles[aIndex] === undefined) {
 							foodWeights[aIndex] = csz;
@@ -1021,7 +1021,7 @@ var bot = window.bot = (function() {
 
 
 				if (foodAngles[i] !== undefined) {
-						var fw=foodAngles[i]*(da+1) / (gotoda + 2);
+						var fw=foodAngles[i] / (da + gotoda * 2 + 0.1);
 						if (fw>foodWeight)
 						{
 							foodWeight=fw;
@@ -1728,7 +1728,7 @@ var userInterface = window.userInterface = (function() {
             }
 
             userInterface.onFrameUpdate();
-            setTimeout(userInterface.oefTimer, (1000 / bot.opt.targetFps * 2) - (Date.now() - start));
+            setTimeout(userInterface.oefTimer, (1000 / bot.opt.targetFps) - (Date.now() - start));
         },
 
         // Quit to menu
