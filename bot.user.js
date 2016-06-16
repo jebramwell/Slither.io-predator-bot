@@ -867,17 +867,28 @@ var bot = window.bot = (function() {
 
 				
 			}
+			
 			if (midCollisionAngle_x == window.snake.xx && midCollisionAngle_y == window.snake.yy)
 			{
                 var midlAng = canvasUtil.fastAtan2(
-                    window.snake.yy - bot.MID_X, window.snake.xx - bot.MID_Y);
+                    bot.MID_Y-window.snake.yy , bot.MID_X-window.snake.xx);
 					
-				if ((Math.abs(window.snake.yy - bot.MID_X) + Math.abs(window.snake.xx - bot.MID_Y))<2000) midlAng = midlAng + Math.PI / 2;
-
-				midCollisionAngle_x= bot.MID_X + bot.MAP_R * Math.cos(midlAng);
-                midCollisionAngle_y= bot.MID_Y + bot.MAP_R * Math.sin(midlAng);
+				if ((Math.abs(window.snake.yy - bot.MID_Y) + Math.abs(window.snake.xx - bot.MID_X))<2000) midlAng = midlAng + Math.PI / 2;
+				
+				if (Math.abs(bot.gotoAngle-midlAng)>0.5)
+				{
+					if (bot.angleBetween(midlAng, bot.gotoAngle)>0) 
+						bot.gotoAngle=bot.gotoAngle-0.01;
+					else
+						bot.gotoAngle=bot.gotoAngle+0.01;
+					
+					
+				}
+				else
+				bot.gotoAngle = midlAng;
 			}
-			bot.gotoAngle = canvasUtil.fastAtan2(window.snake.yy - midCollisionAngle_y, window.snake.xx - midCollisionAngle_x);
+			else
+				bot.gotoAngle = canvasUtil.fastAtan2(window.snake.yy - midCollisionAngle_y, window.snake.xx - midCollisionAngle_x);
         },
 
         // Checks to see if you are going to collide with anything in the collision detection radius
