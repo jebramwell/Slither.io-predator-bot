@@ -904,7 +904,7 @@ var bot = window.bot = (function() {
         // Checks to see if you are going to collide with anything in the collision detection radius
         checkCollision: function() {
 
-			bot.headCircleRadius = bot.opt.radiusMult * (8+bot.snakeRadius) / 4;
+			bot.headCircleRadius = bot.opt.radiusMult * (8+bot.snakeRadius) / 3;
 			bot.frontArcAngle = Math.PI / bot.speedMult / 2.5;
 			bot.frontArcRadius = bot.headCircleRadius * bot.speedMult * 2.2;
 			bot.fullHeadCircleRadius = bot.opt.radiusMult * bot.snakeRadius * 2;
@@ -1021,10 +1021,10 @@ var bot = window.bot = (function() {
 					{
 						if (foodAngles[aIndex] === undefined) {
 							foodWeights[aIndex] = csz;
-							foodAngles[aIndex] = 50 * csz / (Math.abs(Math.sqrt(distance )-bot.snakeRadius*4)+1) / (da+1) / (gotoda + 3);
+							foodAngles[aIndex] = 50 * csz / (Math.abs(Math.sqrt(distance )-bot.snakeRadius*6)+1) ;
 						}
 						else {
-							foodAngles[aIndex] += 50 * csz / (Math.abs(Math.sqrt(distance )-bot.snakeRadius*4)+1) / (da+1) / (gotoda + 3);
+							foodAngles[aIndex] += 50 * csz / (Math.abs(Math.sqrt(distance )-bot.snakeRadius*6)+1) ;
 							foodWeights[aIndex] += csz;
 						}
 					}
@@ -1040,9 +1040,10 @@ var bot = window.bot = (function() {
 
 
 				if (foodAngles[i] !== undefined) {
-						if (foodAngles[i]>foodWeight)
+						var fw=foodAngles[i]*(da+1) / (gotoda + 3);
+						if (fw>foodWeight)
 						{
-							foodWeight=foodAngles[i];
+							foodWeight=fw;
 							foodAindex=i;
 						}
 					
