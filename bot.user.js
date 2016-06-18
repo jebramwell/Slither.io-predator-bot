@@ -5,9 +5,9 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ==UserScript==
-// @name         Slither.io-bot
+// @name         Slither.io-redaor-bot
 // @namespace    http://slither.io/
-// @version      1.2.9
+// @version      1.0.0
 // @description  Slither.io bot
 // @author       Ermiya Eskandary & Théophile Cailliau
 // @match        http://slither.io/
@@ -385,7 +385,7 @@ var bot = window.bot = (function() {
         sectorBox: {},
         currentFood: {},
 		foodAccelDist2: 200000,
-		foodAccelSize: 99,
+		foodAccelSize: 150,
         foodFrames: 8,
 		accelAngle: Math.PI / 2.5,
         opt: {
@@ -647,7 +647,7 @@ var bot = window.bot = (function() {
 			var collisionPoint;
 
             bot.collisionAngles = [];
-
+			var headCircleRadius2 = Math.pow(bot.headCircleRadius, 2);
 			var fullHeadCircleRadius2 = Math.pow(bot.fullHeadCircleRadius, 2);
 			
 			bot.fencingSnake=false;
@@ -781,14 +781,14 @@ var bot = window.bot = (function() {
 									}
 					}					
 					
-					if (fencingAngleslength > (2 * Math.PI / bot.arcSize) * 0.42 && (snakes_minX < snake_minX && snakes_maxX > snake_maxX && snakes_maxY > snake_maxY && snakes_minY < snake_minY))
+					if (fencingAngleslength > (2 * Math.PI / bot.arcSize) * 0.5 && (snakes_minX < snake_minX && snakes_maxX > snake_maxX && snakes_maxY > snake_maxY && snakes_minY < snake_minY))
 					{
 						if (fencingAngleslength !== (2 * Math.PI / bot.arcSize))
 						{
 							bot.fencingSnake = true;
 							for (i = 0; i < ((2 * Math.PI) / bot.arcSize); i++) {
 											if (fencingAngles[i] !== undefined) {										
-												bot.collisionAngles[i].distance=Math.min(fullHeadCircleRadius2-1,bot.collisionAngles[i].distance);
+												bot.collisionAngles[i].distance=Math.min(headCircleRadius2*4,bot.collisionAngles[i].distance);
 											}
 							}
 						}
@@ -850,10 +850,10 @@ var bot = window.bot = (function() {
 
 			if (bot.collisionAngles[isang] !== undefined && (bot.collisionAngles[isang].distance < frontArcRadius2)) {
 				bot.frontCollision = true;	
-				console.log("front colli");
 				bot.isCollision = true;
 			}
-			else {				
+			
+			{				
 				for (i = 0; i < ((2 * Math.PI) / bot.arcSize); i++) {
 
 
@@ -866,7 +866,7 @@ var bot = window.bot = (function() {
 							var iDiff=Math.abs(bot.indexBetween(isang, i));
 							
 
-							if (bot.collisionAngles[i].distance < minHeadDist2 || bot.collisionAngles[i].isHead > 0 && iDiff < ( Math.PI / bot.arcSize / 2 ) && (bot.collisionAngles[i].distance < headCircleRadius22 )) {
+							if (bot.collisionAngles[i].distance < minHeadDist2) { //|| bot.collisionAngles[i].isHead > 0 && iDiff < ( Math.PI / bot.arcSize / 2 ) && (bot.collisionAngles[i].distance < headCircleRadius22 / 2 )) {
 
 								bot.isCollision = true;
 								bot.isHeadCollision = (bot.collisionAngles[i].isHead > 0);
@@ -958,11 +958,10 @@ var bot = window.bot = (function() {
         // Checks to see if you are going to collide with anything in the collision detection radius
         checkCollision: function() {
 
-			bot.headCircleRadius = bot.opt.radiusMult * (10+bot.snakeRadius) / 2.5;
+			bot.headCircleRadius = bot.opt.radiusMult * (5+bot.snakeRadius) / 2;
 			bot.frontArcAngle = bot.arcSize;
-			bot.frontArcRadius = bot.speedMult * bot.headCircleRadius ;
+			bot.frontArcRadius = bot.speedMult * bot.headCircleRadius * 1.25 ;
 			bot.fullHeadCircleRadius = bot.headCircleRadius * 3;
-
 			
 			bot.isCollision = false;
 			bot.fencingSnake = false;
