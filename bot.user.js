@@ -781,7 +781,7 @@ var bot = window.bot = (function() {
 									}
 					}					
 					
-					if (fencingAngleslength > (2 * Math.PI / bot.arcSize) * 0.5 && (snakes_minX < snake_minX && snakes_maxX > snake_maxX && snakes_maxY > snake_maxY && snakes_minY < snake_minY))
+					if (fencingAngleslength > (2 * Math.PI / bot.arcSize) * 0.55 || (fencingAngleslength > (2 * Math.PI / bot.arcSize) * 0.43 && (snakes_minX < snake_minX && snakes_maxX > snake_maxX && snakes_maxY > snake_maxY && snakes_minY < snake_minY)))
 					{
 						if (fencingAngleslength !== (2 * Math.PI / bot.arcSize))
 						{
