@@ -60,7 +60,7 @@ window.log = function() {
         console.log.apply(console, arguments);
     }
 };
-function onload(){
+setTimeout(function (){
     var canvasUtil = window.canvasUtil = (function() {
         return {
             // Ratio of screen size divided by canvas size.
@@ -1668,6 +1668,10 @@ function onload(){
                     if (e.keyCode === 79) {
                         userInterface.toggleMobileRendering(!window.mobileRender);
                     }
+                    // Letter 'R' to change reduceGlare (visual)
+                    if (e.keyCode === 82) {
+                        userInterface.toggleReduceGlare(!window.reduceGlare);
+                    }
                     // Letter 'A' to increase collision detection radius
                     if (e.keyCode === 65) {
                         bot.opt.radiusMult++;
@@ -1757,6 +1761,12 @@ function onload(){
                     window.high_quality = true;
                 }
             },
+            // Manual mobile rendering
+            toggleReduceGlare: function(reduceGlare) {
+                window.reduceGlare = reduceGlare;
+                window.log('reduceGlare set to: ' + window.reduceGlare);
+                userInterface.savePreference('reduceGlare', window.reduceGlare);
+            },          
 
             // Update stats overlay.
             updateStats: function() {
@@ -1821,6 +1831,7 @@ function onload(){
                 oContent.push('version: ' + GM_info.script.version);
                 oContent.push('[T / Right click] bot: ' + ht(bot.isBotEnabled));
                 oContent.push('[O] mobile rendering: ' + ht(window.mobileRender));
+                oContent.push('[R] reduce glare: ' + ht(window.reduceGlare));
                 oContent.push('[A/S] radius multiplier: ' + bot.opt.radiusMult);
                 oContent.push('[P] predator: ' + ht(bot.predatorMode));
                 oContent.push('[N] mouse follow: ' + ht(bot.mouseFollow));
@@ -1894,7 +1905,7 @@ function onload(){
                 canvasUtil.maintainZoom();
                 original_oef();
                 original_redraw();
-
+                if(window.reduceGlare) gla=0;
                 if (window.playing && bot.isBotEnabled && window.snake !== null) {
                     window.onmousemove = function(b) {
                         if (bot.manualFood && !bot.isCollision) original_onmousemove();
@@ -1984,6 +1995,7 @@ function onload(){
         userInterface.loadPreference('visualDebugging', false);
         userInterface.loadPreference('autoRespawn', false);
         userInterface.loadPreference('mobileRender', false);
+        userInterface.loadPreference('reduceGlare', false);
         userInterface.loadPreference('leaderboard', true);
         window.nick.value = userInterface.loadPreference('savedNick', 'Slither.io-bot');
 
@@ -2045,9 +2057,7 @@ function onload(){
         bot.startTime = Date.now();
         userInterface.oefTimer();
     })();
-}
-
-document.addEventListener("load",onload);
+},1000);
 
 // crude hack to bypass a bug in slither.io javascript that sets no_raf to true after the value
 // has been set based on the existence of the requestAnimationFrame api in the current browser
