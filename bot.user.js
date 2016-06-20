@@ -59,7 +59,7 @@ window.log = function() {
         console.log.apply(console, arguments);
     }
 };
-
+function onload(){
 var canvasUtil = window.canvasUtil = (function() {
     return {
         // Ratio of screen size divided by canvas size.
@@ -158,7 +158,6 @@ var canvasUtil = window.canvasUtil = (function() {
                 x: Math.round(x),
                 y: Math.round(y),
                 radius: Math.round(r)
-            };
 
             return c;
         },
@@ -175,6 +174,7 @@ var canvasUtil = window.canvasUtil = (function() {
                 angle = Math.PI / 4;
             }
             angle += (0.1963 * r * r - 0.9817) * r;
+            };
             if (y < 0) {
                 return -angle;
             }
@@ -1425,6 +1425,9 @@ var userInterface = window.userInterface = (function() {
     window.oef = function() {};
     window.redraw = function() {};
 
+    var original_raf = window.raf;
+    window.raf = function() {};
+
     return {
         overlays: {},
 		
@@ -1926,7 +1929,8 @@ var userInterface = window.userInterface = (function() {
             }
 
             userInterface.onFrameUpdate();
-            setTimeout(userInterface.oefTimer, (1000 / bot.opt.targetFps) - (Date.now() - start));
+//            setTimeout(userInterface.oefTimer, (1000 / bot.opt.targetFps) - (Date.now() - start));
+            requestAnimationFrame(userInterface.oefTimer);
         },
 
         // Quit to menu
@@ -2039,4 +2043,24 @@ var userInterface = window.userInterface = (function() {
     // Start!
     bot.startTime = Date.now();
     userInterface.oefTimer();
+})();
+}
+
+document.addEventListener("load",onload);
+
+// crude hack to bypass a bug in slither.io javascript that sets no_raf to true after the value
+// has been set based on the existence of the requestAnimationFrame api in the current browser
+// a more targeted hack might attempt to only impact the setInterval set based on the no_raf
+// instead this hack just makes all intervals auto-clear after 5 seconds.
+// this appears to get the job done with no significant ill effects
+(function() {
+    'use strict';
+    window.originalSetInterval = window.setInterval;
+    window.setInterval = function(f,t){
+        var id = window.originalSetInterval(f,t);
+        setTimeout(function(){clearInterval(id);},5000);
+        console.log("setInterval",{f:f,t:t,id:id});
+return 0;
+    };
+    // Your code here...
 })();
