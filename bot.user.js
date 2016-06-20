@@ -5,10 +5,10 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ==UserScript==
-// @name         Slither.io-redaor-bot
+// @name         Slither.io-redaor-bot requestAnimationFrame
 // @namespace    http://slither.io/
-// @version      1.0.0
-// @description  Slither.io bot
+// @version      1.9.1
+// @description  Slither.io bot preditor + RAF
 // @author       Ermiya Eskandary & Théophile Cailliau
 // @match        http://slither.io/
 // @grant        none
